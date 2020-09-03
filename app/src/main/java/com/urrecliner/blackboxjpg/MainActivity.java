@@ -21,16 +21,14 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
     String PATH_PACKAGE = "BlackBox";
     String PATH_EVENT_JPG = "eventJpg";
     String PATH_EVENT_PHOTO = "eventPhoto";
-    String FORMAT_LOG_TIME = "yy-MM-dd HH.mm.ss.SSS";
-    String FORMAT_DATE = "yy-MM-dd";
-    SimpleDateFormat sdfDate = new SimpleDateFormat(FORMAT_DATE, Locale.getDefault());
-    SimpleDateFormat sdfLogTime = new SimpleDateFormat(FORMAT_LOG_TIME, Locale.getDefault());
     String DATE_PREFIX = "V";
     File mPackagePath = new File(Environment.getExternalStorageDirectory(), PATH_PACKAGE);
     File mPackageEventJpgPath = new File(mPackagePath, PATH_EVENT_JPG);
@@ -47,19 +45,42 @@ public class MainActivity extends AppCompatActivity {
         if (!mPackageEventPhotoPath.exists())
             convert = mPackageEventPhotoPath.mkdirs();
         textView = findViewById(R.id.result);
+        textView.setText("Converting..");
+        new Timer().schedule(new TimerTask() {
+            public void run() {
+//            textView.post(new Runnable() {
+//                @Override
+//                public void run() {
+                    convert_photo();
+//                }
+//            });
+            }
+        }, 1000);
+    }
+
+    void convert_photo() {
         eventFolders = getDirectoryList(mPackageEventJpgPath);
         folderCount = eventFolders.length;
         Log.w("event","Jpg Folder "+ folderCount);
         if (folderCount > 0) {
             Arrays.sort(eventFolders);
             StringBuilder  folderSB = new StringBuilder();
+            folderSB.append("Folder List\n");
             for (File eventPath: eventFolders) {
                 if (eventPath.getName().substring(0, 1).equals(DATE_PREFIX)) {  // to ignore . folder/files
                     folderSB.append(eventPath.getName())
                             .append("\n");
                 }
             }
-            textView.setText(folderSB);
+            final String folderList = folderSB.toString()+"\n-->\n";
+            this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    textView.setText(folderList);
+                    textView.invalidate();
+                }
+            });
+
             for (File eventPath: eventFolders) {
                 if (eventPath.getName().substring(0, 1).equals(DATE_PREFIX)) {  // to ignore . folder/files
                     eventPhotos = getDirectoryList(eventPath);
@@ -68,7 +89,6 @@ public class MainActivity extends AppCompatActivity {
                         convert = eventPhotoPath.mkdirs();
                     Arrays.sort(eventPhotos);
                     photoCount = eventPhotos.length;
-                    Log.w(eventPath.getName()," photos="+photoCount);
                     for (File eventPhoto: eventPhotos) {
                         Log.w(eventPhoto.getName()," process");
                         int size = (int) eventPhoto.length();
@@ -100,26 +120,27 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }
                         }
-//                        StringBuilder processSB = new StringBuilder();
-//                        processSB.append(folderSB);
-//                        processSB.append(eventPhoto.getName());
-//                        final String processMsg = processSB.toString();
-//                        Log.w("log", eventPhoto.getName());
-//                        this.runOnUiThread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                textView.setText(processMsg);
-//                                textView.invalidate();
-//                            }
-//                        });
-//                        SystemClock.sleep(100);
+                        StringBuilder processSB = new StringBuilder();
+                        processSB.append(folderList);
+                        processSB.append(eventPath.getName());
+                        processSB.append(" ");
+                        processSB.append(eventPhoto.getName());
+                        final String processMsg = processSB.toString();
+                        this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                textView.setText(processMsg);
+                                textView.invalidate();
+                            }
+                        });
+                        SystemClock.sleep(100);
                     }
                 }
             }
         }
         Toast.makeText(getApplicationContext(), "Processing Completed", Toast.LENGTH_LONG).show();
-    }
 
+    }
     File[] getDirectoryList(File fullPath) {
         return fullPath.listFiles();
     }
