@@ -15,12 +15,9 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -35,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
     File mPackageEventPhotoPath = new File(mPackagePath, PATH_EVENT_PHOTO);
     File [] eventFolders, eventPhotos;
     int folderCount, photoCount;
-    boolean convert;
+    boolean rtnCode;
     TextView textView;
 
     @Override
@@ -43,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         if (!mPackageEventPhotoPath.exists())
-            convert = mPackageEventPhotoPath.mkdirs();
+            rtnCode = mPackageEventPhotoPath.mkdirs();
         textView = findViewById(R.id.result);
         textView.setText("Converting..");
         new Timer().schedule(new TimerTask() {
@@ -86,11 +83,12 @@ public class MainActivity extends AppCompatActivity {
                     eventPhotos = getDirectoryList(eventPath);
                     File eventPhotoPath = new File(mPackageEventPhotoPath, eventPath.getName());
                     if (!eventPhotoPath.exists())
-                        convert = eventPhotoPath.mkdirs();
+                        rtnCode = eventPhotoPath.mkdirs();
                     Arrays.sort(eventPhotos);
                     photoCount = eventPhotos.length;
+                    int idx = 0;
                     for (File eventPhoto: eventPhotos) {
-                        Log.w(eventPhoto.getName()," process");
+//                        Log.w(eventPhoto.getName()," process");
                         int size = (int) eventPhoto.length();
                         byte[] jpgBytes = new byte[size];
                         try {
@@ -120,12 +118,8 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }
                         }
-                        StringBuilder processSB = new StringBuilder();
-                        processSB.append(folderList);
-                        processSB.append(eventPath.getName());
-                        processSB.append(" ");
-                        processSB.append(eventPhoto.getName());
-                        final String processMsg = processSB.toString();
+                        final String processMsg = folderList+eventPath.getName()+
+                                "\n" + eventPhoto.getName()+" ("+ ++idx + "/"+photoCount+")";
                         this.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -135,10 +129,26 @@ public class MainActivity extends AppCompatActivity {
                         });
                         SystemClock.sleep(100);
                     }
+                    File newFile = new File(eventPath.toString().replace(DATE_PREFIX+"20-","C20-"));
+                    rtnCode = eventPath.renameTo(newFile);
                 }
             }
         }
-        Toast.makeText(getApplicationContext(), "Processing Completed", Toast.LENGTH_LONG).show();
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                textView.setText("DONE !");
+                Toast.makeText(getApplicationContext(), "Processing Completed", Toast.LENGTH_LONG).show();
+            }
+        });
+        new Timer().schedule(new TimerTask() {
+            public void run() {
+                finish();
+                finishAffinity();
+                System.exit(0);
+                android.os.Process.killProcess(android.os.Process.myPid());
+            }
+        }, 3000);
 
     }
     File[] getDirectoryList(File fullPath) {
