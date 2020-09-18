@@ -2,12 +2,17 @@ package com.urrecliner.blackboxjpg;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,23 +46,35 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         if (!mPackageEventPhotoPath.exists())
             rtnCode = mPackageEventPhotoPath.mkdirs();
+        eventFolders = getDirectoryList(mPackageEventJpgPath);
         textView = findViewById(R.id.result);
-        textView.setText("Converting..");
-        new Timer().schedule(new TimerTask() {
-            public void run() {
-//            textView.post(new Runnable() {
-//                @Override
-//                public void run() {
-                    convert_photo();
-//                }
-//            });
-            }
-        }, 1000);
+        folderCount = eventFolders.length;
+        textView.setText((folderCount == 0) ? "No folders to convert" : "[ " + folderCount + " ] folders");
+    }
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Intent intent;
+        switch (item.getItemId()) {
+            case R.id.action_run:
+                new Timer().schedule(new TimerTask() {
+                    public void run() {
+                        convert_photo();
+                    }
+                }, 500);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     void convert_photo() {
-        eventFolders = getDirectoryList(mPackageEventJpgPath);
-        folderCount = eventFolders.length;
         Log.w("event","Jpg Folder "+ folderCount);
         if (folderCount > 0) {
             Arrays.sort(eventFolders);
