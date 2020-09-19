@@ -171,9 +171,9 @@ public class MainActivity extends AppCompatActivity {
                                 textView.invalidate();
                             }
                         });
+                        SystemClock.sleep(30);
 //                        Log.w("prog disp " + idxJpg, eventPhoto.getName());
                     }
-                    SystemClock.sleep(100);
                 }
             }
             File newFile = new File(eventPath.toString().replace(DATE_PREFIX+"20-","C20-"));
