@@ -1,6 +1,7 @@
 package com.urrecliner.blackboxjpg;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -95,15 +96,17 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Intent intent;
         switch (item.getItemId()) {
             case R.id.action_run:
-                if (folderCount > 0)
+                if (folderCount > 0) {
+                    ConstraintLayout cl = findViewById(R.id.background);
+                    cl.setBackgroundColor(Color.GRAY);
                     new Timer().schedule(new TimerTask() {
-                    public void run() {
-                        convert_photo();
-                    }
-                }, 500);
+                        public void run() {
+                            convert_photo();
+                        }
+                    }, 100);
+                }
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -162,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
                         ss.setSpan(new ForegroundColorSpan(Color.BLUE), bPos, fPos, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                         ss.setSpan(new BackgroundColorSpan(Color.YELLOW), bPos, ePos, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                         ss.setSpan(new StyleSpan(Typeface.BOLD), bPos, fPos, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        ss.setSpan(new RelativeSizeSpan(1.2f), bPos, fPos, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+//                        ss.setSpan(new RelativeSizeSpan(1.2f), bPos, fPos, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                         final SpannableString processMsg = ss;
                         this.runOnUiThread(new Runnable() {
                             @Override
@@ -194,8 +197,7 @@ public class MainActivity extends AppCompatActivity {
                 System.exit(0);
                 android.os.Process.killProcess(android.os.Process.myPid());
             }
-        }, 3000);
-
+        }, 5000);
 
     }
 
