@@ -96,6 +96,15 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+        if (folderCount > 0) {
+            ConstraintLayout cl = findViewById(R.id.background);
+            cl.setBackgroundColor(Color.GRAY);
+            new Timer().schedule(new TimerTask() {
+                public void run() {
+                    convert_photo();
+                }
+            }, 1000);
+        }
     }
 
     @Override
