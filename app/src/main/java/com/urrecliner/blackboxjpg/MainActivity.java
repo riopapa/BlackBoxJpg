@@ -20,6 +20,7 @@ import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,13 +55,23 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if (!mPackageEventPhotoPath.exists())
             rtnCode = mPackageEventPhotoPath.mkdirs();
         eventFolders = getDirectoryList(mPackageEventJpgPath);
         textView = findViewById(R.id.result);
         folderCount = eventFolders.length;
-        if (folderCount == 0)
+        if (folderCount == 0) {
             textView.setText("No folders to convert");
+            new Timer().schedule(new TimerTask() {
+                public void run() {
+                    finish();
+                    finishAffinity();
+                    System.exit(0);
+                    android.os.Process.killProcess(android.os.Process.myPid());
+                }
+            }, 5000);
+        }
         else {
             Arrays.sort(eventFolders);
             startPositions = new int[folderCount];
@@ -174,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
                                 textView.invalidate();
                             }
                         });
-                        SystemClock.sleep(30);
+                        SystemClock.sleep(10);
 //                        Log.w("prog disp " + idxJpg, eventPhoto.getName());
                     }
                 }
