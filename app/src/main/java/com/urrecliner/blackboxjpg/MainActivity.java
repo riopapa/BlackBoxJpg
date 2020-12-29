@@ -28,11 +28,14 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -99,9 +102,18 @@ public class MainActivity extends AppCompatActivity {
         if (folderCount > 0) {
             ConstraintLayout cl = findViewById(R.id.background);
             cl.setBackgroundColor(Color.GRAY);
+//            new Timer().schedule(new TimerTask() {
+//                public void run() {
+//                    convert_photo();
+//                }
+//            }, 1000);
             new Timer().schedule(new TimerTask() {
                 public void run() {
-                    convert_photo();
+                    try {
+                        convert_photo();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }, 1000);
         }
@@ -123,7 +135,11 @@ public class MainActivity extends AppCompatActivity {
                     cl.setBackgroundColor(Color.GRAY);
                     new Timer().schedule(new TimerTask() {
                         public void run() {
-                            convert_photo();
+                            try {
+                                convert_photo();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }, 100);
                 }
@@ -132,7 +148,33 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    void convert_photo() {
+//    void zip_photo() throws IOException {
+//        FileOutputStream fos = null;
+//        for (int idxPath = 0; idxPath < eventFolders.length; idxPath++) {
+//            if (!eventNames[idxPath].substring(0,1).equals(DATE_PREFIX))
+//                continue;
+//            File eventPath = eventFolders[idxPath];
+////            eventPhotos = getDirectoryList(eventPath);
+////            String sourceFile = eventPath.toString();
+//            File zipOutFile = new File(mPackageEventPhotoPath, eventPath.getName()+".zip");
+//            try {
+//                fos = new FileOutputStream(zipOutFile);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//            ZipOutputStream zipOut = new ZipOutputStream(fos);
+////            File fileToZip = new File(sourceFile);
+//
+//            zipFile(eventPath, eventPath.getName(), zipOut);
+//            zipOut.close();
+//            fos.close();
+//            File newFile = new File(eventPath.toString().replace(DATE_PREFIX + "20-", "C20-"));
+//            rtnCode = eventPath.renameTo(newFile);
+//        }
+//        Log.e("Zip Photo","completed");
+//    }
+
+    void convert_photo() throws IOException {
         for (int idxPath = 0; idxPath < eventFolders.length; idxPath++) {
             if (!eventNames[idxPath].substring(0,1).equals(DATE_PREFIX))
                 continue;
@@ -221,6 +263,37 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    // zipFile is recursive
+//    private static void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut) throws IOException {
+//        if (fileToZip.isHidden()) {
+//            return;
+//        }
+//        if (fileToZip.isDirectory()) {
+//            Log.e("run Dir",fileToZip.toString());
+//            if (fileName.endsWith("/")) {
+//                zipOut.putNextEntry(new ZipEntry(fileName));
+//                zipOut.closeEntry();
+//            } else {
+//                zipOut.putNextEntry(new ZipEntry(fileName + "/"));
+//                zipOut.closeEntry();
+//            }
+//            File[] children = fileToZip.listFiles();
+//            for (File childFile : children) {
+//                Log.w("jpg",childFile.getName());
+//                zipFile(childFile, fileName + "/" + childFile.getName(), zipOut);
+//            }
+//            return;
+//        }
+//        FileInputStream fis = new FileInputStream(fileToZip);
+//        ZipEntry zipEntry = new ZipEntry(fileName);
+//        zipOut.putNextEntry(zipEntry);
+//        byte[] bytes = new byte[1024];
+//        int length;
+//        while ((length = fis.read(bytes)) >= 0) {
+//            zipOut.write(bytes, 0, length);
+//        }
+//        fis.close();
+//    }
 
     private SpannableString listUpFiles(int currIdx) {
         int sPos = 0, fPos = 0;
